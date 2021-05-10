@@ -10,11 +10,13 @@
         android:name="devmozz.foodling.RecipesFragment"
         android:label="Recipes"
         tools:layout="@layout/fragment_recipes" />
+
     <fragment
         android:id="@+id/favoriteFragment"
         android:name="devmozz.foodling.FavoriteFragment"
         android:label="Favorites"
         tools:layout="@layout/fragment_favorite" />
+
     <fragment
         android:id="@+id/jokeFragment"
         android:name="devmozz.foodling.JokeFragment"
