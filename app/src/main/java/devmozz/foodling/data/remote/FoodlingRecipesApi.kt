@@ -1,11 +1,11 @@
-package devmozz.foodling
+package devmozz.foodling.data.remote
 
 import devmozz.foodling.models.FoodRecipe
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
 
-interface FoodRecipesAPI {
+interface FoodlingRecipesApi {
 
     @GET("/recipes/complexSearch")
     suspend fun getRecipes(

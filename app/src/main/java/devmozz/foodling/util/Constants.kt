@@ -1,4 +1,4 @@
-package devmozz.foodling
+package devmozz.foodling.util
 
 class Constants {
 
