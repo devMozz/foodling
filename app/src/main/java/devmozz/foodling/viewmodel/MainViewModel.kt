@@ -1,4 +1,4 @@
-package devmozz.foodling
+package devmozz.foodling.viewmodel
 
 import android.app.Application
 import android.content.Context
@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private var foodlingRecipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> =
+    var foodlingRecipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> =
         MutableLiveData()
 
     fun getRecipes(queries: Map<String, String>) = viewModelScope.launch {

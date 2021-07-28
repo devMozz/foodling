@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/me_nav"
-    app:startDestination="@id/recipesFragment">
+    app:startDestination="@id/foodlingRecipesFragment">
 
     <fragment
-        android:id="@+id/recipesFragment"
-        android:name="devmozz.foodling.ui.fragments.recipes.RecipesFragment"
+        android:id="@+id/foodlingRecipesFragment"
+        android:name="devmozz.foodling.ui.fragments.recipes.FoodlingRecipesFragment"
         android:label="Recipes"
-        tools:layout="@layout/fragment_recipes" />
+        tools:layout="@layout/fragment_foodling_recipes" />
 
     <fragment
         android:id="@+id/favoriteFragment"
