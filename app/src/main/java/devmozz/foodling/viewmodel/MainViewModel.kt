@@ -4,13 +4,13 @@ import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import devmozz.foodling.data.Repository
+import devmozz.foodling.data.local.FoodlingRecipesEntity
 import devmozz.foodling.models.FoodRecipe
 import devmozz.foodling.util.NetworkResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import javax.inject.Inject
@@ -21,6 +21,16 @@ class MainViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
 
+    /** Local **/
+    val readFoodlingRecipes: LiveData<List<FoodlingRecipesEntity>> =
+        repository.local.readFoodlingDatabase().asLiveData()
+
+    private fun insertFoodlingRecipes(foodlingRecipesEntity: FoodlingRecipesEntity) =
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.local.insertFoodlingRecipes(foodlingRecipesEntity)
+        }
+
+    /** Remote **/
     var foodlingRecipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> =
         MutableLiveData()
 
@@ -34,12 +44,21 @@ class MainViewModel @Inject constructor(
             try {
                 val response = repository.remote.getRecipes(queries)
                 foodlingRecipesResponse.value = handleFoodlingRecipesResponse(response)
+
+                val foodlingRecipe = foodlingRecipesResponse.value!!.data
+                foodlingRecipe?.let { offlineCacheFoodlingRecipes(it) }
+
             } catch (e: Exception) {
                 foodlingRecipesResponse.value = NetworkResult.Error("Foodling Recipes not found.")
             }
         } else {
             foodlingRecipesResponse.value = NetworkResult.Error("No Internet Connection.")
         }
+    }
+
+    private fun offlineCacheFoodlingRecipes(foodlingRecipe: FoodRecipe) {
+        val recipesEntity = FoodlingRecipesEntity(foodlingRecipe)
+        insertFoodlingRecipes(recipesEntity)
     }
 
     private fun handleFoodlingRecipesResponse(response: Response<FoodRecipe>): NetworkResult<FoodRecipe> {
@@ -67,9 +86,10 @@ class MainViewModel @Inject constructor(
         val connectivityManager = getApplication<Application>().getSystemService(
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager
+
         val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val networkCapabilities =
-            connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+
         return when {
             networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
             networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true

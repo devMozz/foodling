@@ -1,6 +1,7 @@
 package devmozz.foodling.data.local
 
 import androidx.room.Database
+import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
@@ -9,7 +10,7 @@ import androidx.room.TypeConverters
     exportSchema = false
 )
 @TypeConverters(FoodlingRecipesTypeConverter::class)
-abstract class FoodlingRecipesDatabase {
+abstract class FoodlingRecipesDatabase : RoomDatabase() {
 
     abstract fun foodlingRecipesDao(): FoodlingRecipesDao
 
