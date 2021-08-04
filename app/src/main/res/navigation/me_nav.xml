@@ -8,8 +8,19 @@
     <fragment
         android:id="@+id/foodlingRecipesFragment"
         android:name="devmozz.foodling.ui.fragments.recipes.FoodlingRecipesFragment"
-        android:label="Recipes"
-        tools:layout="@layout/fragment_foodling_recipes" />
+        android:label="FoodlingRecipes"
+        tools:layout="@layout/fragment_foodling_recipes">
+
+        <action
+            android:id="@+id/action_foodlingRecipesFragment_to_foodlingRecipesBottomSheet"
+            app:destination="@id/foodlingRecipesBottomSheet" />
+
+        <argument
+            android:name="backFromBottomSheetDialog"
+            app:argType="boolean"
+            android:defaultValue="false" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/favoriteFragment"
@@ -22,5 +33,17 @@
         android:name="devmozz.foodling.ui.fragments.joke.JokeFragment"
         android:label="Joke"
         tools:layout="@layout/fragment_joke" />
+
+    <dialog
+        android:id="@+id/foodlingRecipesBottomSheet"
+        android:name="devmozz.foodling.ui.fragments.recipes.bottom.FoodlingRecipesBottomSheet"
+        android:label="foodling_recipes_bottom_sheet"
+        tools:layout="@layout/foodling_recipes_bottom_sheet">
+
+        <action
+            android:id="@+id/action_foodlingRecipesBottomSheet_to_foodlingRecipesFragment"
+            app:destination="@id/foodlingRecipesFragment" />
+
+    </dialog>
 
 </navigation>

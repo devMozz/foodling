@@ -12,6 +12,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.NavHostFragment.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import devmozz.foodling.R
@@ -34,6 +37,8 @@ class FoodlingRecipesFragment : Fragment() {
     private lateinit var foodlingRecipesViewModel: FoodlingRecipesViewModel
     private val mAdapter by lazy { FoodlingRecipesAdapter() }
 
+    private val args by navArgs<FoodlingRecipesFragmentArgs>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,8 +60,14 @@ class FoodlingRecipesFragment : Fragment() {
         setupRecyclerView()
         readFoodlingDatabase()
 
+        binding.fabFoodlingRecipes.setOnClickListener {
+            findNavController().navigate(R.id.action_foodlingRecipesFragment_to_foodlingRecipesBottomSheet)
+        }
+
         return binding.root
     }
+
+    // Requires an initial state to be passed in it's the constructor while liveData does not.
 
     override fun onDestroy() {
         super.onDestroy()
@@ -68,7 +79,7 @@ class FoodlingRecipesFragment : Fragment() {
             with(mainViewModel) {
                 readFoodlingRecipes.observeOnce(viewLifecycleOwner, { database ->
                     when {
-                        database.isNotEmpty() -> {
+                        database.isNotEmpty() && !args.backFromBottomSheetDialog -> {
                             Log.d("FoodlingRecipesFragment", "readDatabase called!")
                             mAdapter.setData(database[0].foodlingRecipes)
                             hideShimmer()
