@@ -20,10 +20,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import devmozz.foodling.R
 import devmozz.foodling.databinding.FragmentFoodlingRecipesBinding
 import devmozz.foodling.ui.adapters.FoodlingRecipesAdapter
+import devmozz.foodling.util.NetworkListener
 import devmozz.foodling.util.NetworkResult
 import devmozz.foodling.util.observeOnce
 import devmozz.foodling.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_foodling_recipes.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -37,6 +42,8 @@ class FoodlingRecipesFragment : Fragment() {
     private lateinit var foodlingRecipesViewModel: FoodlingRecipesViewModel
     private val mAdapter by lazy { FoodlingRecipesAdapter() }
 
+    private lateinit var networkListener: NetworkListener
+
     private val args by navArgs<FoodlingRecipesFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +54,7 @@ class FoodlingRecipesFragment : Fragment() {
             ViewModelProvider(requireActivity()).get(FoodlingRecipesViewModel::class.java)
     }
 
+    @InternalCoroutinesApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,16 +66,30 @@ class FoodlingRecipesFragment : Fragment() {
         mainViewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
 
         setupRecyclerView()
-        readFoodlingDatabase()
+
+        foodlingRecipesViewModel.readComeBackOnline.observe(viewLifecycleOwner, {
+            foodlingRecipesViewModel.comeBackOnline = it
+        })
+
+        lifecycleScope.launchWhenStarted {
+            networkListener = NetworkListener()
+            networkListener.checkNetworkAvailability(requireContext()).collect {
+                Log.d("FoodlingRecipesFragment(NetworkListener)", it.toString())
+                foodlingRecipesViewModel.networkStatus = it
+                foodlingRecipesViewModel.showNetworkConnectionStatus()
+                readFoodlingDatabase()
+            }
+        }
 
         binding.fabFoodlingRecipes.setOnClickListener {
-            findNavController().navigate(R.id.action_foodlingRecipesFragment_to_foodlingRecipesBottomSheet)
+            when {
+                foodlingRecipesViewModel.networkStatus -> findNavController().navigate(R.id.action_foodlingRecipesFragment_to_foodlingRecipesBottomSheet)
+                else -> foodlingRecipesViewModel.showNetworkConnectionStatus()
+            }
         }
 
         return binding.root
     }
-
-    // Requires an initial state to be passed in it's the constructor while liveData does not.
 
     override fun onDestroy() {
         super.onDestroy()
@@ -146,3 +168,4 @@ class FoodlingRecipesFragment : Fragment() {
     }
 
 }
+

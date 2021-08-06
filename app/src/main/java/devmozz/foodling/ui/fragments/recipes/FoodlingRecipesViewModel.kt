@@ -1,7 +1,9 @@
 package devmozz.foodling.ui.fragments.recipes
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import devmozz.foodling.data.DataStoreRepository
@@ -25,9 +27,13 @@ class FoodlingRecipesViewModel @Inject constructor(
     application: Application, private val dataStoreRepository: DataStoreRepository,
 ) : AndroidViewModel(application) {
 
+    var networkStatus = false
+    var comeBackOnline = false
+
     private var mealType = DEFAULT_MEAL_TYPE
     private var dietType = DEFAULT_DIET_TYPE
 
+    var readComeBackOnline = dataStoreRepository.readComaBackOnline.asLiveData()
     val readMealTypeAndDietType = dataStoreRepository.readMealTypeAndDietType
 
     fun saveMealTypeAndDietType(
@@ -59,5 +65,23 @@ class FoodlingRecipesViewModel @Inject constructor(
 
         return queries
     }
+
+    fun showNetworkConnectionStatus() {
+        when {
+            !networkStatus -> {
+                Toast.makeText(getApplication(), "No Internet Connection.", Toast.LENGTH_SHORT).show()
+                saveBackOnline(true)
+            }
+            networkStatus -> if (comeBackOnline) {
+                Toast.makeText(getApplication(), "Come back online!", Toast.LENGTH_SHORT).show()
+                saveBackOnline(false)
+            }
+        }
+    }
+
+    private fun saveBackOnline(comeBackOnline: Boolean) =
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.saveComeBackOnline(comeBackOnline)
+        }
 
 }
