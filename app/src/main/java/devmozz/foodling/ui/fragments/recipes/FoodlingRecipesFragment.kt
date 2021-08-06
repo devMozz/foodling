@@ -3,10 +3,9 @@ package devmozz.foodling.ui.fragments.recipes
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -33,7 +32,8 @@ import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
-class FoodlingRecipesFragment : Fragment() {
+class FoodlingRecipesFragment : Fragment(), SearchView.OnQueryTextListener {
+
 
     private var _binding: FragmentFoodlingRecipesBinding? = null
     private val binding get() = _binding!!
@@ -57,11 +57,13 @@ class FoodlingRecipesFragment : Fragment() {
     @InternalCoroutinesApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentFoodlingRecipesBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
         binding.mainViewModel = mainViewModel
+
+        setHasOptionsMenu(true)
 
         mainViewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
 
@@ -159,12 +161,29 @@ class FoodlingRecipesFragment : Fragment() {
         showShimmer()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.foodling_recipes_menu, menu)
+
+        var search = menu.findItem(R.id.menu_search)
+        val searchView = search.actionView as? SearchView
+        searchView?.isSubmitButtonEnabled = true
+        searchView?.setOnQueryTextListener(this)
+    }
+
     private fun showShimmer() {
         binding.recyclerView.showShimmer()
     }
 
     private fun hideShimmer() {
         binding.recyclerView.hideShimmer()
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        TODO("Not yet implemented")
     }
 
 }
